@@ -1,4 +1,4 @@
-package com.github.biabeb.anhi
+package com.github.sl4b.anhi
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.github.biabeb.anhi">
+    package="com.github.sl4b.anhi">
    <application
         android:label="anhi"
         android:name="${applicationName}"
