@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:anhi/secret.dart';
 import 'package:flutter/material.dart';
 
-import '../../db.dart';
-
 class NewCard extends StatefulWidget {
-  const NewCard({Key? key, required this.onDone, required this.submitNotifier})
+  const NewCard({Key? key, required this.onDone, required this.submitNotifier, required this.secretExists})
       : super(key: key);
 
   final void Function(Secret?) onDone;
+  final bool Function(String) secretExists;
   final Stream<bool> submitNotifier;
 
   @override
@@ -46,7 +45,7 @@ class _NewCardState extends State<NewCard> {
   }
 
   Future<bool> isMnemonicValid() async {
-    return mnemonic.isNotEmpty && !await AnhiDatabase.instance.secretExists(mnemonic);
+    return mnemonic.isNotEmpty && !await widget.secretExists(mnemonic);
   }
 
   void updateMnemonic(String mnemonic) {

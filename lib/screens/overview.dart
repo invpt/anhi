@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:anhi/db.dart';
 import 'package:anhi/screens/overview/new_card.dart';
+import 'package:anhi/secret_storage.dart';
 import 'package:flutter/material.dart';
 
 import '../secret.dart';
@@ -15,10 +15,10 @@ class OverviewPage extends StatefulWidget {
 }
 
 class _OverviewPageState extends State<OverviewPage> {
+  late final _storage = SecretStorage(onAsyncUpdate: () => mounted ? setState(() {}) : {});
+
   final StreamController<bool> submitNotifier = StreamController.broadcast();
   bool isNewSecretVisible = false;
-  bool isLoading = true;
-  List<Secret> secrets = [];
 
   @override
   void dispose() {
@@ -26,31 +26,26 @@ class _OverviewPageState extends State<OverviewPage> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    AnhiDatabase.instance.getAllSecrets().then((loadedSecrets) => setState(() {
-          secrets.addAll(loadedSecrets);
-          isLoading = false;
-        }));
-  }
-
   void _onNewSecretDone(Secret? secret) {
     if (secret != null) {
-      AnhiDatabase.instance.addSecret(secret);
+      setState(() => _storage.add(secret));
     }
     
     setState(() => isNewSecretVisible = false);
   }
 
-  void _hideNewSecret() {
-    submitNotifier.sink.add(false);
+  void _hideNewSecret({required bool save}) {
+    submitNotifier.sink.add(save);
   }
 
+  void _showNewSecret() {
+    setState(() => isNewSecretVisible = true);
+  }
+
+  // This handles back button presses on Android
   Future<bool> _onWillPop() async {
     if (isNewSecretVisible) {
-      _hideNewSecret();
+      _hideNewSecret(save: false);
 
       return false;
     } else {
@@ -69,12 +64,17 @@ class _OverviewPageState extends State<OverviewPage> {
         body: Column(children: [
           Visibility(
               visible: isNewSecretVisible,
-              child: NewCard(onDone: _onNewSecretDone, submitNotifier: submitNotifier.stream)),
-          OverviewList(isAside: isNewSecretVisible, secrets: secrets)
+              child: NewCard(onDone: _onNewSecretDone, submitNotifier: submitNotifier.stream, secretExists: (m) => _storage.exists(m))),
+          OverviewList(isAside: isNewSecretVisible, secrets: _storage.storedSecrets)
         ]),
         floatingActionButton: FloatingActionButton(
-          onPressed: () =>
-              setState(() => isNewSecretVisible = !isNewSecretVisible),
+          onPressed: () {
+            if (isNewSecretVisible) {
+              _hideNewSecret(save: true);
+            } else {
+              _showNewSecret();
+            }
+          },
           tooltip: 'Add secret',
           child:
               isNewSecretVisible ? const Icon(Icons.done) : const Icon(Icons.add),
