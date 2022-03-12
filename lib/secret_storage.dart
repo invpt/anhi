@@ -5,16 +5,22 @@ import 'package:sqflite/sqflite.dart';
 
 /// Wraps exceptions thrown by SQLite.
 class StorageException implements Exception {
-  final DatabaseException _cause;
-  
-  StorageException._(this._cause);
+  final String? _message;
+  final DatabaseException? _cause;
+
+  StorageException._({ String? message, DatabaseException? cause }) : _message = message, _cause = cause;
+
+  @override
+  String toString() {
+    return _message ?? 'Unexpected exception thrown by database' + (_cause?.toString() ?? '');
+  }
 }
 
 /// Abstracts storage of secrets.
 class SecretStorage {
   /// The current saved database instance to be used by `_getCurrentDb`.
   _SecretDatabase? _dbInstance;
-  
+
   /// A future with the property that all current (at the time of getting the
   /// value of the variable) pending database operations  will be complete after
   /// it is awaited. New operations may begin while a future read from this
@@ -23,7 +29,7 @@ class SecretStorage {
 
   /// The list of secrets.
   List<_StoredSecret> _secrets = [];
-  
+
   /// Gets the current list of secrets.
   ///
   /// NOTE: This list is unmodifiable!
@@ -33,14 +39,18 @@ class SecretStorage {
 
   /// This function is called whenever the list of stored secrets is updated outside
   /// of the context of a modification method call.
-  final void Function() onAsyncUpdate;
+  final void Function() onUpdate;
 
-  SecretStorage({ required this.onAsyncUpdate }) {
+  /// This function is called whenever an exception occurs outside of the context
+  /// of a modification method call.
+  final void Function(StorageException) onError;
+
+  SecretStorage({required this.onUpdate, required this.onError}) {
     // Load the preexisting secrets stored on-device.
     _syncDbThen((db) async {
       final all = await db.selectAll();
       _secrets.addAll(all);
-      onAsyncUpdate();
+      onUpdate();
     });
   }
 
@@ -101,12 +111,14 @@ class SecretStorage {
     return finishOriginalUpdates
         .then((_) => _getCurrentDb())
         .then((db) => updater(db))
-        .catchError((err) {}, test: (err) => err is DatabaseException)
+        .catchError((err) => onError(StorageException._(cause: err)),
+            test: (err) => err is DatabaseException)
+        .catchError((err) => onError(err), test: (err) => err is StorageException)
         .then((_) => completer.complete());
   }
 
   /// Updates the database's ordering with the current ordering.
-  /// 
+  ///
   /// WARNING: This function MUST be called from within `_finishUpdatesThenUpdate`.
   Future<void> _updateOrdering(_SecretDatabase db) async {
     await db.updateOrdering(_secrets.map((e) => e.id!));
@@ -212,10 +224,12 @@ class _SecretDatabase {
 
   /// Removes the secret with the given id from the database.
   Future<bool> remove(int id) async {
-    final rowsAffected = await _conn.delete(_secretsTable, where: "$_idColumn = ?", whereArgs: [id]);
+    final rowsAffected = await _conn
+        .delete(_secretsTable, where: "$_idColumn = ?", whereArgs: [id]);
 
     if (rowsAffected > 1) {
-      throw Exception("Internal error: Too many ($rowsAffected) rows affected in deletion. This is a bug.");
+      throw StorageException._(
+          message: "Internal error: Too many ($rowsAffected) rows affected in deletion. This is a bug.");
     } else {
       return rowsAffected == 1;
     }

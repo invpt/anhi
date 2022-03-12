@@ -3,21 +3,31 @@ import 'dart:async';
 import 'package:anhi/secret.dart';
 import 'package:flutter/material.dart';
 
-class NewCard extends StatefulWidget {
-  const NewCard({Key? key, required this.onDone, required this.submitNotifier, required this.secretExists})
+class CreateSecretCardController {
+  void Function({ required bool save })? _trySubmit;
+
+  void trySubmit({ required bool save }) {
+    if (_trySubmit != null) {
+      return _trySubmit!(save: save);
+    } else {
+      throw Exception("Controller used before being given to a widget");
+    }
+  }
+}
+
+class CreateSecretCard extends StatefulWidget {
+  const CreateSecretCard({Key? key, required this.onDone, required this.controller, required this.secretExists})
       : super(key: key);
 
   final void Function(Secret?) onDone;
   final bool Function(String) secretExists;
-  final Stream<bool> submitNotifier;
+  final CreateSecretCardController controller;
 
   @override
-  State<StatefulWidget> createState() => _NewCardState();
+  State<StatefulWidget> createState() => _CreateSecretCardState();
 }
 
-class _NewCardState extends State<NewCard> {
-  late final StreamSubscription<bool> streamSubscription;
-
+class _CreateSecretCardState extends State<CreateSecretCard> {
   String? mnemonicError;
   String mnemonic = '';
   String value = '';
@@ -25,7 +35,7 @@ class _NewCardState extends State<NewCard> {
   @override
   initState() {
     super.initState();
-    streamSubscription = widget.submitNotifier.listen((save) => trySubmit(save: save));
+    widget.controller._trySubmit = trySubmit;
   }
 
   void finish({required bool save}) {
@@ -36,32 +46,32 @@ class _NewCardState extends State<NewCard> {
     }
   }
 
-  Future<void> trySubmit({required bool save}) async {
+  void trySubmit({required bool save}) {
     if (!save) {
       finish(save: false);
-    } else if (await isMnemonicValid()) {
+    } else if (isMnemonicValid()) {
       finish(save: true);
     }
   }
 
-  Future<bool> isMnemonicValid() async {
-    return mnemonic.isNotEmpty && !await widget.secretExists(mnemonic);
+  bool isMnemonicValid() {
+    return mnemonic.isNotEmpty && !widget.secretExists(mnemonic);
   }
 
   void updateMnemonic(String mnemonic) {
     setState(() => this.mnemonic = mnemonic);
 
+    final valid = isMnemonicValid();
+
     // set the error message
-    isMnemonicValid().then((valid) {
-      setState(() {
-        if (valid) {
-          mnemonicError = null;
-        } else if (mnemonic.isEmpty) {
-          mnemonicError = 'You must enter a mnemonic.';
-        } else {
-          mnemonicError = 'Another secret with that mnemonic already exists.';
-        }
-      });
+    setState(() {
+      if (valid) {
+        mnemonicError = null;
+      } else if (mnemonic.isEmpty) {
+        mnemonicError = 'You must enter a mnemonic.';
+      } else {
+        mnemonicError = 'Another secret with that mnemonic already exists.';
+      }
     });
   }
 
@@ -98,7 +108,7 @@ class _NewCardState extends State<NewCard> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Secret',
-                  hintText: 'Enter the secret value',
+                  hintText: 'Enter a secret',
                 ),
               ),
             ],
