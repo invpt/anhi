@@ -7,7 +7,6 @@ const ColorScheme darkColors = ColorScheme(
   onBackground: Colors.white,
   surface: Color(0xFF111111),
   onSurface: Colors.white,
-
   error: Colors.red,
   onError: Colors.white,
   primary: Color(0xFF4d5fd6),
@@ -21,7 +20,6 @@ const ColorScheme lightColors = ColorScheme(
   onBackground: Colors.black,
   surface: Color(0xFFFAFAFA),
   onSurface: Colors.black,
-
   error: Colors.red,
   onError: Colors.white,
   primary: Color(0xFF4d5fd6),
@@ -48,5 +46,3 @@ class AnhiApp extends StatelessWidget {
     );
   }
 }
-
-

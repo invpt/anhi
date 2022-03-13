@@ -1,15 +1,18 @@
 import 'package:anhi/native.dart';
 
 class Secret {
-  const Secret.fromRaw({required this.mnemonic, required this.hash, required this.reviewStage, required this.reviewTime});
-  
+  const Secret.fromRaw(
+      {required this.mnemonic,
+      required this.hash,
+      required this.reviewStage,
+      required this.reviewTime});
+
   static Future<Secret> newSecret(String mnemonic, String secret) async {
     return Secret.fromRaw(
-      mnemonic: mnemonic,
-      hash: await native.hashSecret(secret: secret),
-      reviewStage: 0,
-      reviewTime: DateTime.now()
-    );
+        mnemonic: mnemonic,
+        hash: await native.hashSecret(secret: secret),
+        reviewStage: 0,
+        reviewTime: DateTime.now());
   }
 
   final String mnemonic;
@@ -30,7 +33,6 @@ class Secret {
         mnemonic: mnemonic,
         hash: hash,
         reviewStage: newStage,
-        reviewTime: DateTime.now().add(const Duration(days: 1))
-    );
+        reviewTime: DateTime.now().add(const Duration(days: 1)));
   }
 }

@@ -8,11 +8,14 @@ class StorageException implements Exception {
   final String? _message;
   final DatabaseException? _cause;
 
-  StorageException._({ String? message, DatabaseException? cause }) : _message = message, _cause = cause;
+  StorageException._({String? message, DatabaseException? cause})
+      : _message = message,
+        _cause = cause;
 
   @override
   String toString() {
-    return _message ?? 'Unexpected exception thrown by database' + (_cause?.toString() ?? '');
+    return _message ??
+        'Unexpected exception thrown by database' + (_cause?.toString() ?? '');
   }
 }
 
@@ -113,7 +116,8 @@ class SecretStorage {
         .then((db) => updater(db))
         .catchError((err) => onError(StorageException._(cause: err)),
             test: (err) => err is DatabaseException)
-        .catchError((err) => onError(err), test: (err) => err is StorageException)
+        .catchError((err) => onError(err),
+            test: (err) => err is StorageException)
         .then((_) => completer.complete());
   }
 
@@ -229,7 +233,8 @@ class _SecretDatabase {
 
     if (rowsAffected > 1) {
       throw StorageException._(
-          message: "Internal error: Too many ($rowsAffected) rows affected in deletion. This is a bug.");
+          message:
+              "Internal error: Too many ($rowsAffected) rows affected in deletion. This is a bug.");
     } else {
       return rowsAffected == 1;
     }

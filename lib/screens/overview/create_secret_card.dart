@@ -4,9 +4,9 @@ import 'package:anhi/secret.dart';
 import 'package:flutter/material.dart';
 
 class CreateSecretCardController {
-  void Function({ required bool save })? _trySubmit;
+  void Function({required bool save})? _trySubmit;
 
-  void trySubmit({ required bool save }) {
+  void trySubmit({required bool save}) {
     if (_trySubmit != null) {
       return _trySubmit!(save: save);
     } else {
@@ -16,7 +16,11 @@ class CreateSecretCardController {
 }
 
 class CreateSecretCard extends StatefulWidget {
-  const CreateSecretCard({Key? key, required this.onDone, required this.controller, required this.secretExists})
+  const CreateSecretCard(
+      {Key? key,
+      required this.onDone,
+      required this.controller,
+      required this.secretExists})
       : super(key: key);
 
   final void Function(Secret?) onDone;

@@ -37,11 +37,11 @@ class _OverviewPageState extends State<OverviewPage> {
     if (secret != null) {
       setState(() => _storage.add(secret));
     }
-    
+
     setState(() => isNewSecretVisible = false);
   }
 
-  void hideNewSecret({ required bool save }) {
+  void hideNewSecret({required bool save}) {
     createSecretController.trySubmit(save: save);
   }
 
@@ -68,15 +68,22 @@ class _OverviewPageState extends State<OverviewPage> {
         appBar: AppBar(
           title: const Text('Anhi'),
         ),
-        body: Column(children: [
-          Visibility(
+        body: Column(
+          children: [
+            Visibility(
               visible: isNewSecretVisible,
               child: CreateSecretCard(
                 onDone: onCreateSecretDone,
                 controller: createSecretController,
-                secretExists: _storage.exists)),
-          OverviewList(isAside: isNewSecretVisible, secrets: _storage.storedSecrets)
-        ]),
+                secretExists: _storage.exists,
+              ),
+            ),
+            OverviewList(
+              isAside: isNewSecretVisible,
+              secrets: _storage.storedSecrets,
+            ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             if (isNewSecretVisible) {
@@ -86,8 +93,9 @@ class _OverviewPageState extends State<OverviewPage> {
             }
           },
           tooltip: 'Add secret',
-          child:
-              isNewSecretVisible ? const Icon(Icons.done) : const Icon(Icons.add),
+          child: isNewSecretVisible
+              ? const Icon(Icons.done)
+              : const Icon(Icons.add),
         ),
       ),
     );
@@ -112,12 +120,19 @@ class OverviewList extends StatelessWidget {
         child: IgnorePointer(
           ignoring: isAside,
           child: ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(
-                  left: 4.0, right: 4.0, bottom: 4.0, top: isAside ? 0.0 : 4.0),
-              itemCount: secrets.length,
-              itemBuilder: (context, index) => OverviewCard(secrets[index],
-                  key: ValueKey(secrets[index].mnemonic))),
+            shrinkWrap: true,
+            padding: EdgeInsets.only(
+              left: 4.0,
+              right: 4.0,
+              bottom: 4.0,
+              top: isAside ? 0.0 : 4.0,
+            ),
+            itemCount: secrets.length,
+            itemBuilder: (context, index) => OverviewCard(
+              secrets[index],
+              key: ValueKey(secrets[index].mnemonic),
+            ),
+          ),
         ),
       ),
     );

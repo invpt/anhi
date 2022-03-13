@@ -16,22 +16,28 @@ class OverviewCard extends StatelessWidget {
         : "in ${durationUntil.inDays} day${durationUntil.inDays != 1 ? "s" : ""}";
 
     return SizedBox(
-        width: double.infinity,
-        child: Card(
-          child: InkWell(
-            onTap: () {},
-            child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(secret.mnemonic,
-                        style: Theme.of(context).textTheme.subtitle1),
-                    Text("Review $available",
-                        style: Theme.of(context).textTheme.subtitle2)
-                  ],
-                )),
+      width: double.infinity,
+      child: Card(
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  secret.mnemonic,
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+                Text(
+                  "Review $available",
+                  style: Theme.of(context).textTheme.subtitle2,
+                ),
+              ],
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
