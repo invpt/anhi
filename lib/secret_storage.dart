@@ -180,7 +180,7 @@ class _SecretDatabase {
     await db.execute('''
       CREATE TABLE $_secretsTable(
         $_idColumn INTEGER PRIMARY KEY AUTOINCREMENT,
-        $_mnemonicColumn TEXT NOT NULL,
+        $_mnemonicColumn TEXT NOT NULL UNIQUE,
         $_hashColumn TEXT NOT NULL,
         $_reviewStageColumn INTEGER NOT NULL,
         $_reviewTimeColumn INTEGER NOT NULL,
