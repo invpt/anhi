@@ -42,7 +42,12 @@ class StoredSecret extends Secret {
             hash: secret.hash,
             reviewStage: secret.reviewStage,
             reviewTime: secret.reviewTime);
-  
+
+  @override
+  StoredSecret atNextStage() {
+    return atStage(reviewStage + 1);
+  }
+
   @override
   StoredSecret atStage(int newStage) {
     return StoredSecret._fromRaw(
@@ -133,10 +138,20 @@ class SecretStorage {
   ///
   /// Fails if the given secret is not currently stored.
   void update(StoredSecret stored) {
-    final exists = _secrets.any((secret) => secret._id == stored._id);
+    if (stored._id == null) {
+      throw StorageException._(
+          message:
+              "Failed to update secret that is not stored in the database");
+    }
 
-    if (exists) {
-      _syncDbThen((db) async {});
+    final index = _secrets.indexWhere((secret) => secret._id == stored._id!);
+
+    if (index != -1) {
+      _secrets[index] = stored;
+
+      _syncDbThen((db) async {
+        await db.update(stored._id!, stored);
+      });
     } else {
       throw StorageException._(
           message:
