@@ -1,4 +1,16 @@
+import 'dart:math';
+
 import 'package:anhi/native.dart';
+
+const reviewStageDeltas = <Duration>[
+  Duration(hours: 4),
+  Duration(hours: 8),
+  Duration(days: 1),
+  Duration(days: 2),
+  Duration(days: 7),
+  Duration(days: 14),
+  Duration(days: 112),
+];
 
 class Secret {
   const Secret.fromRaw(
@@ -29,10 +41,13 @@ class Secret {
   }
 
   Secret atStage(int newStage) {
+    var delta = reviewStageDeltas[min(newStage, reviewStageDeltas.length)];
+
     return Secret.fromRaw(
-        mnemonic: mnemonic,
-        hash: hash,
-        reviewStage: newStage,
-        reviewTime: DateTime.now().add(const Duration(days: 1)));
+      mnemonic: mnemonic,
+      hash: hash,
+      reviewStage: newStage,
+      reviewTime: DateTime.now().add(delta),
+    );
   }
 }
