@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:anhi/native.dart';
 
 const reviewStageDeltas = <Duration>[
+  Duration.zero,
   Duration(hours: 4),
   Duration(hours: 8),
   Duration(days: 1),
