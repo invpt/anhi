@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:anhi/screens/overview/create_secret_card.dart';
+import 'package:anhi/screens/review.dart';
 import 'package:anhi/secret_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -16,22 +17,12 @@ class OverviewPage extends StatefulWidget {
 
 class _OverviewPageState extends State<OverviewPage> {
   late final _storage = SecretStorage(
-    onUpdate: onStorageUpdate,
-    onError: onStorageError,
+    onUpdate: () => mounted ? setState(() {}) : {},
+    onError: (e) => throw e,
   );
 
   final createSecretController = CreateSecretCardController();
   bool isNewSecretVisible = false;
-
-  void onStorageUpdate() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void onStorageError(StorageException error) {
-    throw error;
-  }
 
   void onCreateSecretDone(Secret? secret) {
     if (secret != null) {
@@ -47,6 +38,12 @@ class _OverviewPageState extends State<OverviewPage> {
 
   void showNewSecret() {
     setState(() => isNewSecretVisible = true);
+  }
+
+  List<StoredSecret> reviewableSecrets() {
+    return _storage.storedSecrets
+        .where((secret) => secret.reviewTime.isBefore(DateTime.now()))
+        .toList();
   }
 
   // This handles back button presses on Android
@@ -70,12 +67,16 @@ class _OverviewPageState extends State<OverviewPage> {
         ),
         body: Column(
           children: [
-            Visibility(
-              visible: isNewSecretVisible,
-              child: CreateSecretCard(
-                onDone: onCreateSecretDone,
-                controller: createSecretController,
-                secretExists: _storage.exists,
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.ease,
+              child: SizedBox(
+                height: isNewSecretVisible ? null : 0,
+                child: CreateSecretCard(
+                  onDone: onCreateSecretDone,
+                  controller: createSecretController,
+                  secretExists: _storage.exists,
+                ),
               ),
             ),
             OverviewList(
@@ -84,18 +85,42 @@ class _OverviewPageState extends State<OverviewPage> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (isNewSecretVisible) {
-              hideNewSecret(save: true);
-            } else {
-              showNewSecret();
-            }
-          },
-          tooltip: 'Add secret',
-          child: isNewSecretVisible
-              ? const Icon(Icons.done)
-              : const Icon(Icons.add),
+        floatingActionButton: Wrap(
+          direction: Axis.vertical,
+          children: [
+            Visibility(
+              visible: !isNewSecretVisible,
+              child: FloatingActionButton(
+                heroTag: null,
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute<void>(builder: (context) {
+                    return ReviewPage(
+                      reviews: reviewableSecrets(),
+                      storage: _storage,
+                    );
+                  }));
+                },
+                tooltip: 'Review secrets',
+                child: const Icon(Icons.book),
+              ),
+            ),
+            const Padding(padding: EdgeInsets.all(4.0)),
+            FloatingActionButton(
+              heroTag: null,
+              onPressed: () {
+                if (isNewSecretVisible) {
+                  hideNewSecret(save: true);
+                } else {
+                  showNewSecret();
+                }
+              },
+              tooltip: 'Add secret',
+              child: isNewSecretVisible
+                  ? const Icon(Icons.done)
+                  : const Icon(Icons.add),
+            ),
+          ],
         ),
       ),
     );

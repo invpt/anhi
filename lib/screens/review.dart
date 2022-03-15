@@ -1,11 +1,15 @@
-/*import 'package:flutter/material.dart';
+import 'package:anhi/screens/review/review_card.dart';
+import 'package:flutter/material.dart';
 
 import '../secret.dart';
+import '../secret_storage.dart';
 
 class ReviewPage extends StatefulWidget {
-  const ReviewPage(this.reviews, {Key? key}) : super(key: key);
+  const ReviewPage({required this.reviews, required this.storage, Key? key})
+      : super(key: key);
 
-  final List<Secret> reviews;
+  final SecretStorage storage;
+  final List<StoredSecret> reviews;
 
   @override
   State<StatefulWidget> createState() => _ReviewPageState();
@@ -13,6 +17,18 @@ class ReviewPage extends StatefulWidget {
 
 class _ReviewPageState extends State<ReviewPage> {
   int currentReview = 0;
+
+  void onCardDone({required StoredSecret secret, required bool correct}) {
+    print(secret);
+    if (correct) {
+      final atNextStage = secret.atNextStage();
+      print(atNextStage);
+      widget.storage.update(atNextStage);
+      setState(() => currentReview++);
+    } else {
+      setState(() => currentReview++);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,43 +38,18 @@ class _ReviewPageState extends State<ReviewPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TextField(
-              autofocus: true,
-              autocorrect: true,
-              onChanged: (newMnemonic) {
-                mnemonic = newMnemonic;
-                checkMnemonic();
-              },
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                labelText: 'Mnemonic',
-                hintText: 'Enter a mnemonic',
-                errorText: mnemonicError,
-              ),
-            ),
-            const Padding(padding: EdgeInsets.all(8.0)),
-            TextField(
-              obscureText: true,
-              textInputAction: TextInputAction.done,
-              onChanged: (newSecret) {
-                value = newSecret;
-              },
-              onSubmitted: (_) {
-                done(context);
-              },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Secret',
-                hintText: 'Enter the secret value',
-              ),
-            ),
-          ],
+        child: ListView.builder(
+          itemCount: widget.reviews.length + currentReview,
+          itemBuilder: (context, index) {
+            return ReviewCard(
+              secret: widget.reviews[currentReview + index],
+              onDone: ({required correct}) => onCardDone(
+                  secret: widget.reviews[currentReview + index],
+                  correct: correct),
+            );
+          },
         ),
       ),
     );
   }
-
-}*/
+}

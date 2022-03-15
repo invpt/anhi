@@ -9,9 +9,9 @@ const ColorScheme darkColors = ColorScheme(
   onSurface: Colors.white,
   error: Colors.red,
   onError: Colors.white,
-  primary: Color(0xFF4d5fd6),
+  primary: Color(0xFF4AE282),
   onPrimary: Colors.white,
-  secondary: Color(0xFF4AE282),
+  secondary: Color(0xFF4d5fd6),
   onSecondary: Colors.black,
 );
 const ColorScheme lightColors = ColorScheme(
@@ -22,9 +22,9 @@ const ColorScheme lightColors = ColorScheme(
   onSurface: Colors.black,
   error: Colors.red,
   onError: Colors.white,
-  primary: Color(0xFF4d5fd6),
+  primary: Color(0xFF4AE282),
   onPrimary: Colors.white,
-  secondary: Color(0xFF4AE282),
+  secondary: Color(0xFF4d5fd6),
   onSecondary: Colors.black,
 );
 
