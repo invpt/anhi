@@ -39,7 +39,7 @@ class _ReviewPageState extends State<ReviewPage> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView.builder(
-          itemCount: widget.reviews.length + currentReview,
+          itemCount: widget.reviews.length - currentReview,
           itemBuilder: (context, index) {
             return ReviewCard(
               secret: widget.reviews[currentReview + index],
