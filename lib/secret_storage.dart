@@ -151,6 +151,7 @@ class SecretStorage {
 
       _syncDbThen((db) async {
         await db.update(stored._id!, stored);
+        onUpdate();
       });
     } else {
       throw StorageException._(
@@ -288,12 +289,13 @@ class _SecretDatabase {
     await _conn.update(
       _secretsTable,
       {
-        _idColumn: id,
         _mnemonicColumn: secret.mnemonic,
         _hashColumn: secret.hash,
         _reviewStageColumn: secret.reviewStage,
         _reviewTimeColumn: secret.reviewTime.millisecondsSinceEpoch,
       },
+      where: "$_idColumn = ?",
+      whereArgs: [id],
     );
   }
 
