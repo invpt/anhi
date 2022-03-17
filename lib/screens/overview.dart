@@ -32,6 +32,17 @@ class _OverviewPageState extends State<OverviewPage> {
     setState(() => isNewSecretVisible = false);
   }
 
+  void pushReviewPage() {
+    Navigator.push(context, MaterialPageRoute<void>(builder: (context) {
+      return ReviewPage(
+        reviews: reviewableSecrets(),
+        storage: _storage,
+      );
+    })).then((_) =>
+        // Update state, since the review page probably updated secrets
+        setState(() {}));
+  }
+
   void hideNewSecret({required bool save}) {
     createSecretController.trySubmit(save: save);
   }
@@ -92,15 +103,7 @@ class _OverviewPageState extends State<OverviewPage> {
               visible: !isNewSecretVisible,
               child: FloatingActionButton(
                 heroTag: null,
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute<void>(builder: (context) {
-                    return ReviewPage(
-                      reviews: reviewableSecrets(),
-                      storage: _storage,
-                    );
-                  }));
-                },
+                onPressed: pushReviewPage,
                 tooltip: 'Review secrets',
                 child: const Icon(Icons.book),
               ),
