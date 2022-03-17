@@ -2,6 +2,30 @@ import 'package:flutter/material.dart';
 
 import '../../secret.dart';
 
+String prettyPrintDuration(Duration duration) {
+  final inMinutes = duration.inMinutes;
+  final inHours = duration.inHours;
+  final inDays = duration.inDays;
+
+  if (duration.isNegative) {
+    return "available now";
+  } else if (inMinutes < 1) {
+    return "in less than 1 minute";
+  } else if (inMinutes == 1) {
+    return "in 1 minute";
+  } else if (inMinutes < 60) {
+    return "in $inMinutes minutes";
+  } else if (inHours == 1) {
+    return "in 1 hour";
+  } else if (inHours < 24) {
+    return "in $inHours hours";
+  } else if (inDays == 1) {
+    return "in 1 day";
+  } else {
+    return "in $inDays days";
+  }
+}
+
 class OverviewCard extends StatelessWidget {
   const OverviewCard(this.secret, {Key? key}) : super(key: key);
 
@@ -11,9 +35,6 @@ class OverviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     var now = DateTime.now();
     var durationUntil = secret.reviewTime.difference(now);
-    var available = durationUntil.isNegative
-        ? "available now"
-        : "in ${durationUntil.inDays} day${durationUntil.inDays != 1 ? "s" : ""}";
 
     return SizedBox(
       width: double.infinity,
@@ -41,14 +62,14 @@ class OverviewCard extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       secret.mnemonic,
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     Text(
-                      "Review $available",
+                      "Review ${prettyPrintDuration(durationUntil)}",
                       style: Theme.of(context)
                           .textTheme
-                          .subtitle2
-                          ?.copyWith(fontWeight: FontWeight.w300),
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),
