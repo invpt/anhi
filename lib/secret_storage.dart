@@ -20,44 +20,18 @@ class StorageException implements Exception {
 }
 
 class StoredSecret extends Secret {
-  int? _id;
+  final int localId;
 
-  StoredSecret._fromRaw(
-      {int? id,
-      required String mnemonic,
-      required String hash,
-      required int reviewStage,
-      required DateTime reviewTime})
-      : _id = id,
-        super.fromRaw(
-            mnemonic: mnemonic,
-            hash: hash,
-            reviewStage: reviewStage,
-            reviewTime: reviewTime);
+  int? _databaseId;
 
-  StoredSecret._fromSecret(Secret secret, {int? id})
-      : _id = id,
+  StoredSecret._fromSecret(Secret secret,
+      {required this.localId, int? databaseId})
+      : _databaseId = databaseId,
         super.fromRaw(
             mnemonic: secret.mnemonic,
             hash: secret.hash,
             reviewStage: secret.reviewStage,
             reviewTime: secret.reviewTime);
-
-  @override
-  StoredSecret atNextStage() {
-    return atStage(reviewStage + 1);
-  }
-
-  @override
-  StoredSecret atStage(int newStage) {
-    return StoredSecret._fromRaw(
-      mnemonic: mnemonic,
-      hash: hash,
-      reviewStage: newStage,
-      reviewTime: Secret.calculateReviewTime(newStage),
-      id: _id,
-    );
-  }
 }
 
 /// Abstracts storage of secrets.
@@ -70,6 +44,9 @@ class SecretStorage {
   /// it is awaited. New operations may begin while a future read from this
   /// variable at a specific point in time is being awaited.
   Future<void> _finishUpdates = Future.value(null);
+
+  /// A counter that is incremented each time a new local id is added.
+  int _localIdCounter = 0;
 
   /// The list of secrets.
   List<StoredSecret> _secrets = [];
@@ -92,22 +69,34 @@ class SecretStorage {
   SecretStorage({required this.onUpdate, required this.onError}) {
     // Load the preexisting secrets stored on-device.
     _syncDbThen((db) async {
-      final all = await db.selectAll();
-      _secrets.addAll(all);
+      final dbSecrets = await db.selectAll();
+      _secrets.addAll(
+        dbSecrets.map(
+          (dbSecret) => StoredSecret._fromSecret(
+            dbSecret,
+            localId: _nextLocalId(),
+            databaseId: dbSecret.id,
+          ),
+        ),
+      );
       onUpdate();
     });
   }
 
   /// Adds a secret to the beginning of the list.
   void add(Secret secret) {
-    final storedSecret = StoredSecret._fromSecret(secret);
+    if (_secrets.any((e) => e.mnemonic == secret.mnemonic)) {
+      throw StorageException._(message: "Secret with non-unique mnemonic added to SecretStorage");
+    }
+
+    final storedSecret = StoredSecret._fromSecret(secret, localId: _nextLocalId());
     _secrets.insert(0, storedSecret);
 
     _syncDbThen((db) async {
       // Insert the secret into the DB without an index.
-      final id = await db.insert(secret);
+      final databaseId = await db.insert(secret);
       // Set the ID of the item we added to _secrets earlier now that it's actually in the DB.
-      storedSecret._id = id;
+      storedSecret._databaseId = databaseId;
       // Update the ordering, since the secret didn't have an index when we inserted it.
       await _updateOrdering(db);
     });
@@ -123,35 +112,34 @@ class SecretStorage {
     });
   }
 
-  /// Removes the secret at `index`.
-  void remove(int index) {
-    final removed = _secrets.removeAt(index);
+  /// Removes the secret with the given `localId`.
+  void remove(int localId) {
+    final index = _secrets.indexWhere((secret) => secret.localId == localId);
+    final secret = _secrets[index];
+    _secrets.removeAt(index);
 
     _syncDbThen((db) async {
       // Remove the secret.
-      await db.remove(removed._id!);
+      await db.remove(secret._databaseId!);
       // Note: No need to update the ordering.
     });
   }
 
-  /// Updates the given secret to a new value.
+  /// Updates the secret with `localId` to the given value.
   ///
   /// Fails if the given secret is not currently stored.
-  void update(StoredSecret stored) {
-    if (stored._id == null) {
-      throw StorageException._(
-          message:
-              "Failed to update secret that is not stored in the database");
-    }
-
-    final index = _secrets.indexWhere((secret) => secret._id == stored._id!);
+  void update(int id, Secret secret) {
+    final index = _secrets.indexWhere((secret) => secret.localId == id);
 
     if (index != -1) {
-      _secrets[index] = stored;
+      final newSecret = StoredSecret._fromSecret(secret, localId: id, databaseId: _secrets[id]._databaseId);
+      final oldSecret = _secrets[index];
+      _secrets[index] = newSecret;
 
       _syncDbThen((db) async {
-        await db.update(stored._id!, stored);
-        onUpdate();
+        // Set the databaseId in case the old value wasn't stored at the time of updating
+        newSecret._databaseId = oldSecret._databaseId;
+        await db.update(id, secret);
       });
     } else {
       throw StorageException._(
@@ -163,6 +151,11 @@ class SecretStorage {
   /// Returns true if there exists a secret with `mnemonic`.
   bool exists(String mnemonic) {
     return _secrets.any((secret) => secret.mnemonic == mnemonic);
+  }
+
+  /// Generates the next local secret id.
+  int _nextLocalId() {
+    return _localIdCounter++;
   }
 
   /// Runs `updater`, ensuring that the database is syncronized with `_secrets`
@@ -189,16 +182,31 @@ class SecretStorage {
   }
 
   /// Updates the database's ordering with the current ordering.
-  ///
-  /// WARNING: This function MUST be called from within `_finishUpdatesThenUpdate`.
   Future<void> _updateOrdering(_SecretDatabase db) async {
-    await db.updateOrdering(_secrets.map((e) => e._id!));
+    await db.updateOrdering(_secrets.map((e) => e._databaseId!));
   }
 
   /// Gets the current secret database, opening a connection if one has not already been opened.
   Future<_SecretDatabase> _getCurrentDb() async {
     return _dbInstance ??= await _SecretDatabase.open();
   }
+}
+
+/// A secret returned by the database.
+class _DatabaseSecret extends Secret {
+  final int id;
+
+  _DatabaseSecret._fromRaw(
+      {required this.id,
+      required String mnemonic,
+      required String hash,
+      required int reviewStage,
+      required DateTime reviewTime})
+      : super.fromRaw(
+            mnemonic: mnemonic,
+            hash: hash,
+            reviewStage: reviewStage,
+            reviewTime: reviewTime);
 }
 
 /// Interacts with SQLite to store secrets on-device.
@@ -233,7 +241,7 @@ class _SecretDatabase {
     ''');
   }
 
-  Future<Iterable<StoredSecret>> selectAll() async {
+  Future<Iterable<_DatabaseSecret>> selectAll() async {
     var queryResult = await _conn.query(_secretsTable,
         columns: <String>[
           _idColumn,
@@ -244,7 +252,7 @@ class _SecretDatabase {
         ],
         orderBy: _indexColumn);
 
-    return queryResult.map((e) => StoredSecret._fromRaw(
+    return queryResult.map((e) => _DatabaseSecret._fromRaw(
         id: e[_idColumn]! as int,
         mnemonic: e[_mnemonicColumn]! as String,
         hash: e[_hashColumn]! as String,

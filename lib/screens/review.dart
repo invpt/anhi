@@ -19,11 +19,8 @@ class _ReviewPageState extends State<ReviewPage> {
   int currentReview = 0;
 
   void onCardDone({required StoredSecret secret, required bool correct}) {
-    print(secret);
     if (correct) {
-      final atNextStage = secret.atNextStage();
-      print(atNextStage);
-      widget.storage.update(atNextStage);
+      widget.storage.update(secret.localId, secret.atNextStage());
       setState(() => currentReview++);
     } else {
       setState(() => currentReview++);
@@ -44,8 +41,9 @@ class _ReviewPageState extends State<ReviewPage> {
             return ReviewCard(
               secret: widget.reviews[currentReview + index],
               onDone: ({required correct}) => onCardDone(
-                  secret: widget.reviews[currentReview + index],
-                  correct: correct),
+                secret: widget.reviews[currentReview + index],
+                correct: correct,
+              ),
             );
           },
         ),
