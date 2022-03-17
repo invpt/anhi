@@ -27,9 +27,11 @@ String prettyPrintDuration(Duration duration) {
 }
 
 class OverviewCard extends StatelessWidget {
-  const OverviewCard(this.secret, {Key? key}) : super(key: key);
+  const OverviewCard({required this.secret, required this.onTap, Key? key})
+      : super(key: key);
 
   final Secret secret;
+  final void Function() onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class OverviewCard extends StatelessWidget {
       child: Card(
         shape: shape,
         child: InkWell(
-          onTap: () {},
+          onTap: onTap,
           customBorder: shape,
           child: Padding(
             padding: const EdgeInsets.all(10.0),

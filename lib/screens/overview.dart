@@ -1,4 +1,5 @@
 import 'package:anhi/screens/create_secret.dart';
+import 'package:anhi/screens/edit.dart';
 import 'package:anhi/screens/review.dart';
 import 'package:anhi/secret.dart';
 import 'package:anhi/secret_storage.dart';
@@ -46,6 +47,15 @@ class _OverviewPageState extends State<OverviewPage> {
     });
   }
 
+  void pushEditSecretPage(StoredSecret secret) {
+    Navigator.push(context, MaterialPageRoute<void>(builder: (context) {
+      return EditSecretPage(
+        secret: secret,
+        storage: _storage,
+      );
+    })).then((_) => setState(() {}));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +66,8 @@ class _OverviewPageState extends State<OverviewPage> {
         padding: const EdgeInsets.all(4.0),
         itemCount: _storage.storedSecrets.length,
         itemBuilder: (context, index) => OverviewCard(
-          _storage.storedSecrets[index],
+          secret: _storage.storedSecrets[index],
+          onTap: () => pushEditSecretPage(_storage.storedSecrets[index]),
           key: ValueKey(_storage.storedSecrets[index].localId),
         ),
       ),
