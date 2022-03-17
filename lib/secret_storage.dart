@@ -86,10 +86,12 @@ class SecretStorage {
   /// Adds a secret to the beginning of the list.
   void add(Secret secret) {
     if (_secrets.any((e) => e.mnemonic == secret.mnemonic)) {
-      throw StorageException._(message: "Secret with non-unique mnemonic added to SecretStorage");
+      throw StorageException._(
+          message: "Secret with non-unique mnemonic added to SecretStorage");
     }
 
-    final storedSecret = StoredSecret._fromSecret(secret, localId: _nextLocalId());
+    final storedSecret =
+        StoredSecret._fromSecret(secret, localId: _nextLocalId());
     _secrets.insert(0, storedSecret);
 
     _syncDbThen((db) async {
@@ -128,18 +130,19 @@ class SecretStorage {
   /// Updates the secret with `localId` to the given value.
   ///
   /// Fails if the given secret is not currently stored.
-  void update(int id, Secret secret) {
-    final index = _secrets.indexWhere((secret) => secret.localId == id);
+  void update(int localId, Secret secret) {
+    final index = _secrets.indexWhere((secret) => secret.localId == localId);
 
     if (index != -1) {
-      final newSecret = StoredSecret._fromSecret(secret, localId: id, databaseId: _secrets[id]._databaseId);
+      final newSecret = StoredSecret._fromSecret(secret,
+          localId: localId, databaseId: _secrets[localId]._databaseId);
       final oldSecret = _secrets[index];
       _secrets[index] = newSecret;
 
       _syncDbThen((db) async {
         // Set the databaseId in case the old value wasn't stored at the time of updating
         newSecret._databaseId = oldSecret._databaseId;
-        await db.update(id, secret);
+        await db.update(oldSecret._databaseId!, secret);
       });
     } else {
       throw StorageException._(
