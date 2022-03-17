@@ -138,7 +138,7 @@ class OverviewList extends StatelessWidget {
   }) : super(key: key);
 
   final bool isAside;
-  final List<Secret> secrets;
+  final List<StoredSecret> secrets;
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +158,7 @@ class OverviewList extends StatelessWidget {
             itemCount: secrets.length,
             itemBuilder: (context, index) => OverviewCard(
               secrets[index],
-              key: ValueKey(secrets[index].mnemonic),
+              key: ValueKey(secrets[index].localId),
             ),
           ),
         ),
