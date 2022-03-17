@@ -64,6 +64,7 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
               onChanged: updateMnemonic,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
+                filled: true,
                 border: const OutlineInputBorder(),
                 labelText: 'Mnemonic',
                 hintText: 'Enter a mnemonic',
@@ -79,6 +80,7 @@ class _CreateSecretPageState extends State<CreateSecretPage> {
               },
               onSubmitted: (_) => finish(context, save: true),
               decoration: const InputDecoration(
+                filled: true,
                 border: OutlineInputBorder(),
                 labelText: 'Secret',
                 hintText: 'Enter a secret',
