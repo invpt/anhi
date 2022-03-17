@@ -14,10 +14,37 @@ class ReviewCard extends StatefulWidget {
 }
 
 class _ReviewCardState extends State<ReviewCard> {
+  bool isHashing = false;
   String value = "";
+  String? error;
 
-  void trySubmit() {
-    widget.secret.verify(value).then((isValid) => widget.onDone(correct: true));
+  void finish({required bool save}) {
+    if (!save) {
+      widget.onDone(correct: false);
+    } else {
+      setState(() => isHashing = true);
+      widget.secret.verify(value).then((correct) {
+        if (correct) {
+          widget.onDone(correct: true);
+        } else {
+          setState(() {
+            error = "Secret does not match.";
+            isHashing = false;
+          });
+        }
+      });
+    }
+  }
+
+  void onSecretChanged(String newValue) {
+    if (isHashing) {
+      return;
+    }
+
+    setState(() {
+      value = newValue;
+      error = null;
+    });
   }
 
   @override
@@ -27,7 +54,8 @@ class _ReviewCardState extends State<ReviewCard> {
       child: SizedBox(
         width: double.infinity,
         child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -37,18 +65,24 @@ class _ReviewCardState extends State<ReviewCard> {
                 Center(
                   child: Text(
                     widget.secret.mnemonic,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w300),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w300),
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(8.0)),
                 TextField(
                   obscureText: true,
                   textInputAction: TextInputAction.done,
-                  onChanged: (newSecret) => value = newSecret,
-                  onSubmitted: (_) => trySubmit(),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+                  onChanged: onSecretChanged,
+                  onEditingComplete: () {},
+                  onSubmitted: (_) => finish(save: true),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
                     labelText: 'Secret',
+                    helperText: isHashing ? 'Hashing...' : null,
+                    errorText: error,
                   ),
                 ),
               ],
