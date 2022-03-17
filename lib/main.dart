@@ -10,9 +10,9 @@ const ColorScheme darkColors = ColorScheme(
   error: Colors.red,
   onError: Colors.white,
   primary: Color(0xFF4AE282),
-  onPrimary: Colors.white,
+  onPrimary: Colors.black,
   secondary: Color(0xFF4d5fd6),
-  onSecondary: Colors.black,
+  onSecondary: Colors.white,
 );
 const ColorScheme lightColors = ColorScheme(
   brightness: Brightness.light,
@@ -23,9 +23,9 @@ const ColorScheme lightColors = ColorScheme(
   error: Colors.red,
   onError: Colors.white,
   primary: Color(0xFF4AE282),
-  onPrimary: Colors.white,
+  onPrimary: Colors.black,
   secondary: Color(0xFF4d5fd6),
-  onSecondary: Colors.black,
+  onSecondary: Colors.white,
 );
 
 void main() {
