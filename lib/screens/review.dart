@@ -17,14 +17,17 @@ class ReviewPage extends StatefulWidget {
 }
 
 class _ReviewPageState extends State<ReviewPage> {
-  int currentReview = 0;
+  late List<StoredSecret> reviews = List.unmodifiable(widget.reviews);
 
   void onCardDone({required StoredSecret secret, required bool correct}) {
     if (correct) {
       widget.storage.update(secret.localId, secret.atNextStage());
-      setState(() => currentReview++);
+    }
+
+    if (reviews.length == 1) {
+      Navigator.pop(context);
     } else {
-      setState(() => currentReview++);
+      setState(() => reviews = reviews.sublist(1));
     }
   }
 
@@ -34,27 +37,42 @@ class _ReviewPageState extends State<ReviewPage> {
       appBar: AppBar(
         title: const Text("Review"),
       ),
-      body: Padding(
+      body: ListView.custom(
         padding: const EdgeInsets.all(8.0),
-        child: ListView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: widget.reviews.length - currentReview,
-          itemBuilder: (context, index) {
-            return Opacity(
-              opacity: 1.0 / pow(2.0, index),
-              child: IgnorePointer(
-                ignoring: index != 0,
-                child: ReviewCard(
-                  secret: widget.reviews[currentReview + index],
-                  onDone: ({required correct}) => onCardDone(
-                    secret: widget.reviews[currentReview + index],
-                    correct: correct,
-                  ),
-                  key: ValueKey(widget.reviews[currentReview + index].localId),
-                ),
-              ),
-            );
-          },
+        physics: const NeverScrollableScrollPhysics(),
+        childrenDelegate: SliverChildBuilderDelegate(
+          buildSliverChild,
+          childCount: reviews.length,
+          findChildIndexCallback: (Key key) => reviews.indexWhere(
+              (element) => element.localId == (key as ValueKey<int>).value),
+        ),
+      ),
+    );
+  }
+
+  Widget? buildSliverChild(BuildContext context, int index) {
+    final secret = reviews[index];
+
+    return AnimatedOpacity(
+      curve: Curves.ease,
+      duration: const Duration(milliseconds: 400),
+      opacity: pow(0.5, index) as double,
+      key: ValueKey(secret.localId),
+      child: IgnorePointer(
+        ignoring: index != 0,
+        child: Dismissible(
+          onDismissed: (direction) => onCardDone(
+            secret: secret,
+            correct: false,
+          ),
+          key: const ValueKey(null),
+          child: ReviewCard(
+            secret: secret,
+            onDone: ({required correct}) => onCardDone(
+              secret: secret,
+              correct: correct,
+            ),
+          ),
         ),
       ),
     );
