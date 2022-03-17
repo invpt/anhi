@@ -53,23 +53,17 @@ class _CreateSecretCardState extends State<CreateSecretCard> {
   void trySubmit({required bool save}) {
     if (!save) {
       finish(save: false);
-    } else if (isMnemonicValid()) {
+    } else if (checkError()) {
       finish(save: true);
     }
   }
 
-  bool isMnemonicValid() {
-    return mnemonic.isNotEmpty && !widget.secretExists(mnemonic);
-  }
-
-  void updateMnemonic(String mnemonic) {
-    setState(() => this.mnemonic = mnemonic);
-
-    final valid = isMnemonicValid();
+  bool checkError() {
+    final isValid = mnemonic.isNotEmpty && !widget.secretExists(mnemonic);
 
     // set the error message
     setState(() {
-      if (valid) {
+      if (isValid) {
         mnemonicError = null;
       } else if (mnemonic.isEmpty) {
         mnemonicError = 'You must enter a mnemonic.';
@@ -77,6 +71,13 @@ class _CreateSecretCardState extends State<CreateSecretCard> {
         mnemonicError = 'Another secret with that mnemonic already exists.';
       }
     });
+
+    return isValid;
+  }
+
+  void updateMnemonic(String mnemonic) {
+    setState(() => this.mnemonic = mnemonic);
+    checkError();
   }
 
   @override
