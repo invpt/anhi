@@ -36,27 +36,31 @@ class OverviewCard extends StatelessWidget {
     var now = DateTime.now();
     var durationUntil = secret.reviewTime.difference(now);
 
+    final shape =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0));
+
     return SizedBox(
       width: double.infinity,
       child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        shape: shape,
         child: InkWell(
           onTap: () {},
+          customBorder: shape,
           child: Padding(
-            padding: const EdgeInsets.only(
-              left: 12.0,
-              right: 8.0,
-              top: 8.0,
-              bottom: 8.0,
-            ),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               children: [
-                Text("7",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1
-                        ?.copyWith(fontWeight: FontWeight.w300)),
-                const SizedBox(width: 12.0),
+                CircleAvatar(
+                  radius: 18.0,
+                  child: Center(
+                    child: Text('${secret.reviewStage}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.copyWith(fontWeight: FontWeight.w300)),
+                  ),
+                ),
+                const SizedBox(width: 8.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[

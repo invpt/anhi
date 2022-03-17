@@ -16,9 +16,9 @@ const ColorScheme darkColors = ColorScheme(
 );
 const ColorScheme lightColors = ColorScheme(
   brightness: Brightness.light,
-  background: Colors.white,
+  background: Color(0xFFEEEEEE),
   onBackground: Colors.black,
-  surface: Color(0xFFFAFAFA),
+  surface: Colors.white,
   onSurface: Colors.black,
   error: Colors.red,
   onError: Colors.white,
