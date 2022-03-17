@@ -73,6 +73,7 @@ class _ReviewCardState extends State<ReviewCard> {
                 ),
                 const Padding(padding: EdgeInsets.all(8.0)),
                 TextField(
+                  autofocus: true,
                   obscureText: true,
                   textInputAction: TextInputAction.done,
                   onChanged: onSecretChanged,
