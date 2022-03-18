@@ -20,10 +20,10 @@ class _OverviewPageState extends State<OverviewPage> {
     onError: (e) => throw e,
   );
 
-  void pushReviewPage() {
+  void pushReviewPage(reviews) {
     Navigator.push(context, MaterialPageRoute<void>(builder: (context) {
       return ReviewPage(
-        reviews: reviewableSecrets(),
+        reviews: reviews,
         storage: _storage,
       );
     })).then((_) => setState(() {}));
@@ -65,18 +65,25 @@ class _OverviewPageState extends State<OverviewPage> {
       body: ListView.builder(
         padding: const EdgeInsets.all(4.0),
         itemCount: _storage.storedSecrets.length,
-        itemBuilder: (context, index) => OverviewCard(
-          secret: _storage.storedSecrets[index],
-          onTap: () => pushEditSecretPage(_storage.storedSecrets[index]),
-          key: ValueKey(_storage.storedSecrets[index].localId),
-        ),
+        itemBuilder: (context, index) {
+          final secret = _storage.storedSecrets[index];
+
+          return OverviewCard(
+            secret: secret,
+            onRequestEdit: () => pushEditSecretPage(secret),
+            onRequestReview: () => pushReviewPage([secret]),
+            onRequestDelete: () =>
+                setState(() => _storage.remove(secret.localId)),
+            key: ValueKey(secret.localId),
+          );
+        },
       ),
       floatingActionButton: Wrap(
         direction: Axis.vertical,
         children: [
           FloatingActionButton(
             heroTag: null,
-            onPressed: pushReviewPage,
+            onPressed: () => pushReviewPage(reviewableSecrets()),
             tooltip: 'Review secrets',
             child: const Icon(Icons.book),
           ),

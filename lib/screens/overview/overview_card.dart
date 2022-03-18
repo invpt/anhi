@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../secret.dart';
 
-String prettyPrintDuration(Duration duration) {
+String _prettyPrintDuration(Duration duration) {
   final inMinutes = duration.inMinutes;
   final inHours = duration.inHours;
   final inDays = duration.inDays;
@@ -26,12 +26,25 @@ String prettyPrintDuration(Duration duration) {
   }
 }
 
+enum _PopupAction {
+  edit,
+  review,
+  delete,
+}
+
 class OverviewCard extends StatelessWidget {
-  const OverviewCard({required this.secret, required this.onTap, Key? key})
+  const OverviewCard(
+      {required this.secret,
+      required this.onRequestEdit,
+      required this.onRequestReview,
+      required this.onRequestDelete,
+      Key? key})
       : super(key: key);
 
   final Secret secret;
-  final void Function() onTap;
+  final void Function() onRequestEdit;
+  final void Function() onRequestReview;
+  final void Function() onRequestDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -45,42 +58,90 @@ class OverviewCard extends StatelessWidget {
       width: double.infinity,
       child: Card(
         shape: shape,
-        child: InkWell(
-          onTap: onTap,
-          customBorder: shape,
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 18.0,
-                  child: Center(
-                    child: Text('${secret.reviewStage}',
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18.0,
+                    child: Center(
+                      child: Text('${secret.reviewStage}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w300)),
+                    ),
+                  ),
+                  const SizedBox(width: 8.0),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        secret.mnemonic,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      Text(
+                        "Review ${_prettyPrintDuration(durationUntil)}",
                         style: Theme.of(context)
                             .textTheme
-                            .titleLarge
-                            ?.copyWith(fontWeight: FontWeight.w300)),
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w400),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 8.0),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      secret.mnemonic,
-                      style: Theme.of(context).textTheme.titleLarge,
+                ],
+              ),
+              PopupMenuButton(
+                shape: shape,
+                onSelected: (action) {
+                  switch (action) {
+                    case _PopupAction.edit:
+                      return onRequestEdit();
+                    case _PopupAction.review:
+                      return onRequestReview();
+                    case _PopupAction.delete:
+                      return onRequestDelete();
+                  }
+                },
+                itemBuilder: (context) {
+                  return <PopupMenuItem>[
+                    PopupMenuItem(
+                      value: _PopupAction.edit,
+                      child: Row(
+                        children: const <Widget>[
+                          Icon(Icons.edit),
+                          SizedBox(width: 16.0),
+                          Text("Details"),
+                        ],
+                      ),
                     ),
-                    Text(
-                      "Review ${prettyPrintDuration(durationUntil)}",
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w400),
+                    PopupMenuItem(
+                      value: _PopupAction.review,
+                      child: Row(
+                        children: const <Widget>[
+                          Icon(Icons.book),
+                          SizedBox(width: 16.0),
+                          Text("Review"),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    PopupMenuItem(
+                      value: _PopupAction.delete,
+                      child: Row(
+                        children: const <Widget>[
+                          Icon(Icons.delete),
+                          SizedBox(width: 16.0),
+                          Text("Delete"),
+                        ],
+                      ),
+                    ),
+                  ];
+                },
+              ),
+            ],
           ),
         ),
       ),
