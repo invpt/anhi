@@ -135,7 +135,7 @@ class SecretStorage {
 
     if (index != -1) {
       final newSecret = StoredSecret._fromSecret(secret,
-          localId: localId, databaseId: _secrets[localId]._databaseId);
+          localId: localId, databaseId: _secrets[index]._databaseId);
       final oldSecret = _secrets[index];
       _secrets[index] = newSecret;
 
