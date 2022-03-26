@@ -93,34 +93,39 @@ class _CreateSecretCardState extends State<CreateSecretCard> {
   Widget build(BuildContext context) {
     return ActionCard(
       header: const Text("Creating new secret"),
-      top: TextField(
-        focusNode: mnemonicFocusNode,
-        controller: mnemonicController,
-        autocorrect: true,
-        onChanged: updateMnemonic,
-        textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-          filled: true,
-          border: const OutlineInputBorder(),
-          labelText: 'Mnemonic',
-          hintText: 'Enter a mnemonic',
-          errorText: mnemonicError,
-        ),
-      ),
-      bottom: TextField(
-        controller: secretController,
-        obscureText: true,
-        textInputAction: TextInputAction.done,
-        onChanged: (newSecret) {
-          value = newSecret;
-        },
-        onSubmitted: (_) => finish(save: true),
-        decoration: const InputDecoration(
-          filled: true,
-          border: OutlineInputBorder(),
-          labelText: 'Secret',
-          hintText: 'Enter a secret',
-        ),
+      child: Column(
+        children: [
+          TextField(
+            focusNode: mnemonicFocusNode,
+            controller: mnemonicController,
+            autocorrect: true,
+            onChanged: updateMnemonic,
+            textInputAction: TextInputAction.next,
+            decoration: InputDecoration(
+              filled: true,
+              border: const OutlineInputBorder(),
+              labelText: 'Mnemonic',
+              hintText: 'Enter a mnemonic',
+              errorText: mnemonicError,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          TextField(
+            controller: secretController,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            onChanged: (newSecret) {
+              value = newSecret;
+            },
+            onSubmitted: (_) => finish(save: true),
+            decoration: const InputDecoration(
+              filled: true,
+              border: OutlineInputBorder(),
+              labelText: 'Secret',
+              hintText: 'Enter a secret',
+            ),
+          ),
+        ],
       ),
     );
   }

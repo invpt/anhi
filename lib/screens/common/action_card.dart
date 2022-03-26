@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ActionCard extends StatelessWidget {
-  const ActionCard(
-      {this.header, required this.top, required this.bottom, Key? key})
+  const ActionCard({this.header, required this.child, Key? key})
       : super(key: key);
 
   final Widget? header;
-  final Widget top;
-  final Widget bottom;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +27,7 @@ class ActionCard extends StatelessWidget {
                   ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      top,
-                      const SizedBox(height: 16.0),
-                      bottom,
-                    ],
-                  ),
+                  child: child,
                 ),
               ],
             )),

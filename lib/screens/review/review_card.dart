@@ -78,28 +78,33 @@ class _ReviewCardState extends State<ReviewCard> {
   @override
   Widget build(BuildContext context) {
     return ActionCard(
-      top: Center(
-        child: Text(
-          widget.secret.mnemonic,
-          style: Theme.of(context)
-              .textTheme
-              .titleLarge
-              ?.copyWith(fontWeight: FontWeight.w300),
-        ),
-      ),
-      bottom: TextField(
-        focusNode: textFocusNode,
-        obscureText: true,
-        textInputAction: TextInputAction.done,
-        onChanged: onSecretChanged,
-        onEditingComplete: () {},
-        onSubmitted: (_) => finish(save: true),
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          labelText: 'Secret',
-          helperText: isHashing ? 'Hashing...' : null,
-          errorText: error,
-        ),
+      child: Column(
+        children: [
+          Center(
+            child: Text(
+              widget.secret.mnemonic,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w300),
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          TextField(
+            focusNode: textFocusNode,
+            obscureText: true,
+            textInputAction: TextInputAction.done,
+            onChanged: onSecretChanged,
+            onEditingComplete: () {},
+            onSubmitted: (_) => finish(save: true),
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: 'Secret',
+              helperText: isHashing ? 'Hashing...' : null,
+              errorText: error,
+            ),
+          ),
+        ],
       ),
     );
   }
