@@ -2,18 +2,21 @@ import 'package:anhi/secret.dart';
 import 'package:anhi/secret_storage.dart';
 import 'package:flutter/material.dart';
 
-class EditSecretPage extends StatefulWidget {
-  const EditSecretPage({Key? key, required this.secret, required this.storage})
+class SecretDetailsPage extends StatefulWidget {
+  const SecretDetailsPage(
+      {Key? key, required this.secret, required this.storage})
       : super(key: key);
 
   final StoredSecret secret;
   final SecretStorage storage;
 
   @override
-  State<StatefulWidget> createState() => _EditSecretPageState();
+  State<StatefulWidget> createState() => _SecretDetailsPageState();
 }
 
-class _EditSecretPageState extends State<EditSecretPage> {
+class _SecretDetailsPageState extends State<SecretDetailsPage> {
+  late final TextEditingController mnemonicController =
+      TextEditingController(text: widget.secret.mnemonic);
   String? mnemonicError;
   String mnemonic = '';
   String value = '';
@@ -28,7 +31,8 @@ class _EditSecretPageState extends State<EditSecretPage> {
   }
 
   bool checkError() {
-    final isValid = mnemonic.isNotEmpty && !widget.storage.exists(mnemonic);
+    final isValid = mnemonic == widget.secret.mnemonic ||
+        mnemonic.isNotEmpty && !widget.storage.exists(mnemonic);
 
     // set the error message
     setState(() {
@@ -53,15 +57,15 @@ class _EditSecretPageState extends State<EditSecretPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit secret'),
+        title: const Text('Details'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              autofocus: true,
+              controller: mnemonicController,
               autocorrect: true,
               onChanged: updateMnemonic,
               textInputAction: TextInputAction.next,
@@ -71,21 +75,6 @@ class _EditSecretPageState extends State<EditSecretPage> {
                 labelText: 'Mnemonic',
                 hintText: 'Enter a mnemonic',
                 errorText: mnemonicError,
-              ),
-            ),
-            const Padding(padding: EdgeInsets.all(8.0)),
-            TextField(
-              obscureText: true,
-              textInputAction: TextInputAction.done,
-              onChanged: (newSecret) {
-                value = newSecret;
-              },
-              onSubmitted: (_) => finish(context, save: true),
-              decoration: const InputDecoration(
-                filled: true,
-                border: OutlineInputBorder(),
-                labelText: 'Secret',
-                hintText: 'Enter a secret',
               ),
             ),
           ],

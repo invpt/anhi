@@ -3,10 +3,21 @@ import 'package:flutter/material.dart';
 
 import '../../secret.dart';
 
+class ReviewCardController {
+  void Function()? _show;
+
+  void show() => _show!();
+}
+
 class ReviewCard extends StatefulWidget {
-  const ReviewCard({required this.secret, required this.onDone, Key? key})
+  const ReviewCard(
+      {required this.controller,
+      required this.secret,
+      required this.onDone,
+      Key? key})
       : super(key: key);
 
+  final ReviewCardController controller;
   final Secret secret;
   final void Function({required bool correct}) onDone;
 
@@ -15,9 +26,25 @@ class ReviewCard extends StatefulWidget {
 }
 
 class _ReviewCardState extends State<ReviewCard> {
+  final FocusNode textFocusNode = FocusNode();
+
   bool isHashing = false;
   String value = "";
   String? error;
+
+  @override
+  void initState() {
+    super.initState();
+
+    widget.controller._show = () => textFocusNode.requestFocus();
+  }
+
+  @override
+  void dispose() {
+    textFocusNode.dispose();
+
+    super.dispose();
+  }
 
   void finish({required bool save}) {
     if (!save) {
@@ -61,7 +88,7 @@ class _ReviewCardState extends State<ReviewCard> {
         ),
       ),
       bottom: TextField(
-        autofocus: true,
+        focusNode: textFocusNode,
         obscureText: true,
         textInputAction: TextInputAction.done,
         onChanged: onSecretChanged,

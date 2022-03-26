@@ -11,39 +11,36 @@ class ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: SizedBox(
-        width: double.infinity,
-        child: Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-          child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                children: <Widget>[
-                  if (header != null)
-                    Column(
-                      children: <Widget>[
-                        header!,
-                        const Divider(thickness: 2.0),
-                      ],
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        top,
-                        const SizedBox(height: 16.0),
-                        bottom,
-                      ],
-                    ),
+    return SizedBox(
+      width: double.infinity,
+      child: Card(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+        child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: <Widget>[
+                if (header != null)
+                  Column(
+                    children: <Widget>[
+                      header!,
+                      const Divider(thickness: 2.0),
+                    ],
                   ),
-                ],
-              )),
-        ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      top,
+                      const SizedBox(height: 16.0),
+                      bottom,
+                    ],
+                  ),
+                ),
+              ],
+            )),
       ),
     );
   }

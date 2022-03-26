@@ -112,7 +112,7 @@ class OverviewCard extends StatelessWidget {
                       value: _PopupAction.edit,
                       child: Row(
                         children: const <Widget>[
-                          Icon(Icons.edit),
+                          Icon(Icons.details),
                           SizedBox(width: 16.0),
                           Text("Details"),
                         ],

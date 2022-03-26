@@ -18,6 +18,15 @@ class ReviewPage extends StatefulWidget {
 
 class _ReviewPageState extends State<ReviewPage> {
   late List<StoredSecret> reviews = List.unmodifiable(widget.reviews);
+  late List<ReviewCardController> controllers = (() {
+    List<ReviewCardController> controllers = [];
+
+    for (var _ in widget.reviews) {
+      controllers.add(ReviewCardController());
+    }
+
+    return controllers;
+  })();
 
   void onCardDone({required StoredSecret secret, required bool correct}) {
     if (correct) {
@@ -27,7 +36,12 @@ class _ReviewPageState extends State<ReviewPage> {
     if (reviews.length == 1) {
       Navigator.pop(context);
     } else {
-      setState(() => reviews = reviews.sublist(1));
+      setState(() {
+        reviews = reviews.sublist(1);
+        controllers = controllers.sublist(1);
+      });
+
+      controllers[0].show();
     }
   }
 
@@ -67,6 +81,7 @@ class _ReviewPageState extends State<ReviewPage> {
           ),
           key: const ValueKey(null),
           child: ReviewCard(
+            controller: controllers[index],
             secret: secret,
             onDone: ({required correct}) => onCardDone(
               secret: secret,
