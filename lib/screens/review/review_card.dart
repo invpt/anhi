@@ -14,9 +14,11 @@ class ReviewCard extends StatefulWidget {
       {required this.controller,
       required this.secret,
       required this.onDone,
+      required this.autofocus,
       Key? key})
       : super(key: key);
 
+  final bool autofocus;
   final ReviewCardController controller;
   final Secret secret;
   final void Function({required bool correct}) onDone;
@@ -91,6 +93,7 @@ class _ReviewCardState extends State<ReviewCard> {
           ),
           const SizedBox(height: 16.0),
           TextField(
+            autofocus: widget.autofocus,
             focusNode: textFocusNode,
             obscureText: true,
             textInputAction: TextInputAction.done,

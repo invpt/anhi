@@ -81,6 +81,7 @@ class _ReviewPageState extends State<ReviewPage> {
           ),
           key: const ValueKey(null),
           child: ReviewCard(
+            autofocus: index == 0,
             controller: controllers[index],
             secret: secret,
             onDone: ({required correct}) => onCardDone(
