@@ -7,7 +7,7 @@ import 'package:anhi/secret_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'overview/overlay_animator.dart';
-import 'overview/overview_card.dart';
+import 'overview/info_card.dart';
 
 class OverviewPage extends StatefulWidget {
   const OverviewPage({Key? key}) : super(key: key);
@@ -133,7 +133,7 @@ class _OverviewPageState extends State<OverviewPage> {
     if (editingSecretId == secret.localId) {
       throw Exception();
     } else {
-      return OverviewCard(
+      return InfoCard(
         secret: secret,
         onRequestEdit: () => pushEditSecretPage(secret),
         onRequestReview: () => secret.reviewTime.isBefore(DateTime.now())
@@ -203,7 +203,7 @@ class _AnimatedCreateSecretState extends State<_AnimatedCreateSecret> {
         widget.onFinished(createdSecret);
       },
       base: createdSecret != null
-          ? OverviewCard(
+          ? InfoCard(
               secret: createdSecret!,
               onRequestEdit: () {},
               onRequestReview: () {},

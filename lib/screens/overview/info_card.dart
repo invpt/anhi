@@ -32,8 +32,8 @@ enum _PopupAction {
   delete,
 }
 
-class OverviewCard extends StatelessWidget {
-  const OverviewCard(
+class InfoCard extends StatelessWidget {
+  const InfoCard(
       {required this.secret,
       required this.onRequestEdit,
       required this.onRequestReview,
