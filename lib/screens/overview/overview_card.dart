@@ -54,95 +54,89 @@ class OverviewCard extends StatelessWidget {
     final shape =
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0));
 
-    return SizedBox(
-      width: double.infinity,
-      child: Card(
-        shape: shape,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 18.0,
-                    child: Center(
-                      child: Text('${secret.reviewStage}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w300)),
-                    ),
+    return Card(
+      shape: shape,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: <Widget>[
+            CircleAvatar(
+              radius: 18.0,
+              child: Center(
+                child: Text('${secret.reviewStage}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w300)),
+              ),
+            ),
+            const SizedBox(width: 8.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    secret.mnemonic,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const SizedBox(width: 8.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        secret.mnemonic,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      Text(
-                        "Review ${_prettyPrintDuration(durationUntil)}",
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w400),
-                      ),
-                    ],
+                  Text(
+                    "Review ${_prettyPrintDuration(durationUntil)}",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w400),
                   ),
                 ],
               ),
-              PopupMenuButton(
-                shape: shape,
-                onSelected: (action) {
-                  switch (action) {
-                    case _PopupAction.edit:
-                      return onRequestEdit();
-                    case _PopupAction.review:
-                      return onRequestReview();
-                    case _PopupAction.delete:
-                      return onRequestDelete();
-                  }
-                },
-                itemBuilder: (context) {
-                  return <PopupMenuItem>[
-                    PopupMenuItem(
-                      value: _PopupAction.edit,
-                      child: Row(
-                        children: const <Widget>[
-                          Icon(Icons.details),
-                          SizedBox(width: 16.0),
-                          Text("Details"),
-                        ],
-                      ),
+            ),
+            PopupMenuButton(
+              shape: shape,
+              onSelected: (action) {
+                switch (action) {
+                  case _PopupAction.edit:
+                    return onRequestEdit();
+                  case _PopupAction.review:
+                    return onRequestReview();
+                  case _PopupAction.delete:
+                    return onRequestDelete();
+                }
+              },
+              itemBuilder: (context) {
+                return <PopupMenuItem>[
+                  PopupMenuItem(
+                    value: _PopupAction.edit,
+                    child: Row(
+                      children: const <Widget>[
+                        Icon(Icons.details),
+                        SizedBox(width: 16.0),
+                        Text("Details"),
+                      ],
                     ),
-                    PopupMenuItem(
-                      value: _PopupAction.review,
-                      child: Row(
-                        children: const <Widget>[
-                          Icon(Icons.book),
-                          SizedBox(width: 16.0),
-                          Text("Review"),
-                        ],
-                      ),
+                  ),
+                  PopupMenuItem(
+                    value: _PopupAction.review,
+                    child: Row(
+                      children: const <Widget>[
+                        Icon(Icons.book),
+                        SizedBox(width: 16.0),
+                        Text("Review"),
+                      ],
                     ),
-                    PopupMenuItem(
-                      value: _PopupAction.delete,
-                      child: Row(
-                        children: const <Widget>[
-                          Icon(Icons.delete),
-                          SizedBox(width: 16.0),
-                          Text("Delete"),
-                        ],
-                      ),
+                  ),
+                  PopupMenuItem(
+                    value: _PopupAction.delete,
+                    child: Row(
+                      children: const <Widget>[
+                        Icon(Icons.delete),
+                        SizedBox(width: 16.0),
+                        Text("Delete"),
+                      ],
                     ),
-                  ];
-                },
-              ),
-            ],
-          ),
+                  ),
+                ];
+              },
+            ),
+          ],
         ),
       ),
     );
