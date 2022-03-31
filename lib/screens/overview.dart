@@ -1,12 +1,9 @@
-import 'package:anhi/screens/create_secret.dart';
 import 'package:anhi/screens/details.dart';
-import 'package:anhi/screens/overview/create_card.dart';
+import 'package:anhi/screens/overview/animated_create_card.dart';
 import 'package:anhi/screens/review.dart';
-import 'package:anhi/secret.dart';
 import 'package:anhi/secret_storage.dart';
 import 'package:flutter/material.dart';
 
-import 'overview/overlay_animator.dart';
 import 'overview/info_card.dart';
 
 class OverviewPage extends StatefulWidget {
@@ -22,11 +19,12 @@ class _OverviewPageState extends State<OverviewPage> {
     onError: (e) => throw e,
   );
 
-  final _AnimatedCreateSecretController createSecretController =
-      _AnimatedCreateSecretController();
+  final AnimatedCreateCardController createSecretController =
+      AnimatedCreateCardController();
+
+  final List<int> editingSecretIds = [];
 
   bool creatingSecret = false;
-  int? editingSecretId;
 
   void pushReviewPage(reviews) {
     Navigator.push(context, MaterialPageRoute<void>(builder: (context) {
@@ -112,7 +110,7 @@ class _OverviewPageState extends State<OverviewPage> {
     if (index == 0) {
       return SizedBox(
         height: creatingSecret ? null : 0,
-        child: _AnimatedCreateSecret(
+        child: AnimatedCreateCard(
           storage: _storage,
           controller: createSecretController,
           onFinished: (secret) => setState(() {
@@ -130,7 +128,7 @@ class _OverviewPageState extends State<OverviewPage> {
 
     final secret = _storage.storedSecrets[index];
 
-    if (editingSecretId == secret.localId) {
+    if (false) {
       throw Exception();
     } else {
       return InfoCard(
@@ -144,82 +142,5 @@ class _OverviewPageState extends State<OverviewPage> {
         key: ValueKey(secret.localId),
       );
     }
-  }
-}
-
-class _AnimatedCreateSecretController {
-  void Function()? _begin;
-  void Function()? _finish;
-
-  void begin() => _begin!();
-  void finish() => _finish!();
-}
-
-class _AnimatedCreateSecret extends StatefulWidget {
-  const _AnimatedCreateSecret(
-      {required this.storage,
-      required this.onFinished,
-      required this.controller,
-      Key? key})
-      : super(key: key);
-
-  final SecretStorage storage;
-  final void Function(Secret?) onFinished;
-  final _AnimatedCreateSecretController controller;
-
-  @override
-  State<StatefulWidget> createState() => _AnimatedCreateSecretState();
-}
-
-class _AnimatedCreateSecretState extends State<_AnimatedCreateSecret> {
-  final OverlayAnimatorController overlayAnimatorController =
-      OverlayAnimatorController();
-  final CreateSecretCardController createSecretCardController =
-      CreateSecretCardController();
-
-  Secret? createdSecret;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller._begin = () {
-      overlayAnimatorController.open();
-      createSecretCardController.grabFocus();
-    };
-    widget.controller._finish = () {
-      createdSecret = null;
-      overlayAnimatorController.close();
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return OverlayAnimator(
-      controller: overlayAnimatorController,
-      onLoaded: () {},
-      onOpenDone: () {},
-      onCloseDone: () {
-        createSecretCardController.reset();
-        widget.onFinished(createdSecret);
-      },
-      base: createdSecret != null
-          ? InfoCard(
-              secret: createdSecret!,
-              onRequestEdit: () {},
-              onRequestReview: () {},
-              onRequestDelete: () {})
-          : null,
-      overlay: CreateSecretCard(
-        controller: createSecretCardController,
-        storage: widget.storage,
-        onDone: (secret) {
-          if (secret != null) {
-            setState(() => createdSecret = secret);
-          }
-
-          overlayAnimatorController.close();
-        },
-      ),
-    );
   }
 }
