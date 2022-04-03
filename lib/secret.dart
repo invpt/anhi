@@ -51,6 +51,7 @@ class Secret {
       Duration(days: 112),
     ];
 
-    return DateTime.now().add(reviewStageDeltas[min(reviewStage, reviewStageDeltas.length)]);
+    return DateTime.now()
+        .add(reviewStageDeltas[min(reviewStage, reviewStageDeltas.length)]);
   }
 }
