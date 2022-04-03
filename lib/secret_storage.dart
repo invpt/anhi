@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:anhi/main.dart';
 import 'package:anhi/secret.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 /// Wraps exceptions thrown by SQLite.
 class StorageException implements Exception {
@@ -94,6 +97,7 @@ class SecretStorage {
         StoredSecret._fromSecret(secret, localId: _nextLocalId());
     _secrets.insert(0, storedSecret);
 
+    _updateNotifications();
     _syncDbThen((db) async {
       // Insert the secret into the DB without an index.
       final databaseId = await db.insert(secret);
@@ -120,6 +124,7 @@ class SecretStorage {
     final secret = _secrets[index];
     _secrets.removeAt(index);
 
+    _updateNotifications();
     _syncDbThen((db) async {
       // Remove the secret.
       await db.remove(secret._databaseId!);
@@ -139,6 +144,7 @@ class SecretStorage {
       final oldSecret = _secrets[index];
       _secrets[index] = newSecret;
 
+      _updateNotifications();
       _syncDbThen((db) async {
         // Set the databaseId in case the old value wasn't stored at the time of updating
         newSecret._databaseId = oldSecret._databaseId;
@@ -187,6 +193,44 @@ class SecretStorage {
   /// Updates the database's ordering with the current ordering.
   Future<void> _updateOrdering(_SecretDatabase db) async {
     await db.updateOrdering(_secrets.map((e) => e._databaseId!));
+  }
+
+  Future<void> _updateNotifications() async {
+    await flutterLocalNotificationsPlugin.cancelAll();
+
+    final notifications = <int, DateTime>{};
+
+    for (final secret in _secrets) {
+      // skip reviews that are already available
+      if (secret.reviewTime.isBefore(DateTime.now())) {
+        continue;
+      }
+
+      final daysFromNow = secret.reviewTime.difference(DateTime.now()).inDays;
+
+      if (notifications[daysFromNow] != null) {
+        if (notifications[daysFromNow]!.isAfter(secret.reviewTime)) {
+          notifications[daysFromNow] = secret.reviewTime;
+        } else {
+          continue;
+        }
+      } else {
+        notifications[daysFromNow] = secret.reviewTime;
+      }
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+          daysFromNow,
+          'New review(s) available',
+          null,
+          tz.TZDateTime.now(tz.local)
+              .add(secret.reviewTime.difference(DateTime.now())),
+          const NotificationDetails(
+              android:
+                  AndroidNotificationDetails('reviews', 'Review reminders')),
+          androidAllowWhileIdle: true,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime);
+    }
   }
 
   /// Gets the current secret database, opening a connection if one has not already been opened.

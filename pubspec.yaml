@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_native_timezone: ^2.0.0
+  flutter_local_notifications: ^9.4.0
   flutter_rust_bridge: ^1.22.1
   sqflite: ^2.0.2
 

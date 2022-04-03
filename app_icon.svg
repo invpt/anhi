@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150">
+    <path
+        stroke="#e5ccff"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none"
+        fill-rule="evenodd"
+        stroke-width="10"
+        d="M 75 125 v -100 l -50 100 m 50 -100 l 50 100 l 0 -100 m -100 50 h 50"
+    />
+</svg>
