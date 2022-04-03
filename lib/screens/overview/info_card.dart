@@ -3,26 +3,45 @@ import 'package:flutter/material.dart';
 import '../../secret.dart';
 
 String _prettyPrintDuration(Duration duration) {
-  final inMinutes = duration.inMinutes;
-  final inHours = duration.inHours;
-  final inDays = duration.inDays;
+  int modDiff(int a, int b) {
+    final mod = a % b;
 
-  if (duration.isNegative) {
+    if (mod < (mod - b).abs()) {
+      return mod;
+    } else {
+      return mod - b;
+    }
+  }
+
+  const hoursEpsilon = 10 * Duration.secondsPerMinute;
+  const daysEpsilon = 45 * Duration.secondsPerMinute;
+
+  var seconds = duration.inSeconds;
+
+  var diff = 0;
+  if ((diff = modDiff(seconds, Duration.secondsPerDay)).abs() < daysEpsilon) {
+    seconds -= diff;
+  } else if ((diff = modDiff(seconds, Duration.secondsPerHour)).abs() <
+      hoursEpsilon) {
+    seconds -= diff;
+  }
+
+  if (seconds <= 0) {
     return "available now";
-  } else if (inMinutes < 1) {
+  } else if (seconds < Duration.secondsPerMinute) {
     return "in less than 1 minute";
-  } else if (inMinutes == 1) {
+  } else if (seconds == Duration.secondsPerMinute) {
     return "in 1 minute";
-  } else if (inMinutes < 60) {
-    return "in $inMinutes minutes";
-  } else if (inHours == 1) {
+  } else if (seconds < Duration.secondsPerHour) {
+    return "in ${seconds ~/ Duration.secondsPerMinute} minutes";
+  } else if (seconds == Duration.secondsPerHour) {
     return "in 1 hour";
-  } else if (inHours < 24) {
-    return "in $inHours hours";
-  } else if (inDays == 1) {
+  } else if (seconds < Duration.secondsPerDay) {
+    return "in ${seconds ~/ Duration.secondsPerHour} hours";
+  } else if (seconds == Duration.secondsPerDay) {
     return "in 1 day";
   } else {
-    return "in $inDays days";
+    return "in ${seconds ~/ Duration.secondsPerDay} days";
   }
 }
 
